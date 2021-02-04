@@ -2,7 +2,10 @@
     "cSpell.words": [
         "LSTM",
         "pylab",
-        "pyplot"
+        "pyplot",
+        "xlabel",
+        "xticks",
+        "ylabel"
     ],
     "python.pythonPath": "env7/bin/python"
 }
