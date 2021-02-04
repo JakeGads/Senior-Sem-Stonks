@@ -1,7 +1,6 @@
 from os import write
 import pandas as pd
 from pandas_datareader import data as pdr
-import fix_yahoo_finance as yf 
 import datetime
 import matplotlib.pyplot as plt
 from matplotlib.pylab import rcParams
