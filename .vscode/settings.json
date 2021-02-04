@@ -3,5 +3,6 @@
         "LSTM",
         "pylab",
         "pyplot"
-    ]
+    ],
+    "python.pythonPath": "/Users/jakeg/source/repo/Senior-Sem-Stonks/env/bin/python3.9"
 }
