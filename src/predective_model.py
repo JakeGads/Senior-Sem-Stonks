@@ -35,8 +35,8 @@ def get_stock_data(tag: str, start_date: dt.datetime, end_date: dt.datetime) -> 
 def get_predictive_model(tag:str, start_date = pd.to_datetime('2021-01-01'), end_date = dt.datetime.today()):
     df = get_stock_data(tag, start_date, end_date)
     
-    high_prices = df.loc[:,'High']
-    low_prices = df.loc[:,'Low']
+    high_prices = df.loc[:,'High'].values
+    low_prices = df.loc[:,'Low'].values
     mid_prices = (high_prices+low_prices)/2.0
 
     # TODO dynamic
