@@ -1,3 +1,4 @@
+# @Justin https://www.youtube.com/watch?v=bi0cKgmRuiA
 FROM python:3.7.5-slim
 
 ENV VIRTUAL_ENV "/venv"
