@@ -11,7 +11,7 @@ import numpy as np
 import tensorflow as tf # This code has been tested with TensorFlow 1.6
 from sklearn.preprocessing import MinMaxScaler
 
-def get_stock_data(tag: str, start_date: datetime.datetime, end_date: datetime.datetime) -> pd.core.frame.DataFrame:
+def get_stock_data(tag: str, start_date: dt.datetime, end_date: dt.datetime) -> pd.core.frame.DataFrame:
     # forces tag into a list
     tag = [tag]
     # attempts to pull the data
@@ -35,8 +35,8 @@ def get_stock_data(tag: str, start_date: datetime.datetime, end_date: datetime.d
 def get_predictive_model(tag:str, start_date = pd.to_datetime('2021-01-01'), end_date = dt.datetime.today()):
     df = get_stock_data(tag, start_date, end_date)
     
-    high_prices = df.loc[:,'High'].as_matrix()
-    low_prices = df.loc[:,'Low'].as_matrix()
+    high_prices = df.loc[:,'High']
+    low_prices = df.loc[:,'Low']
     mid_prices = (high_prices+low_prices)/2.0
 
     # TODO dynamic
