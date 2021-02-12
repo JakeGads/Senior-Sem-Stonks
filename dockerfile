@@ -1,25 +1,20 @@
-# @Justin https://www.youtube.com/watch?v=bi0cKgmRuiA
-FROM python:3.7.5-slim
+FROM python:3.7
 
-ENV VIRTUAL_ENV "/venv"
-RUN python -m venv $VIRTUAL_ENV
-ENV PATH "$VIRTUAL_ENV/bin:$PATH"
+ADD main.py .
+ADD predective_model.py .
+ADD linux.pip .
+
 RUN python -m pip install --upgrade pip
-RUN python -m pip install \
-        certifi \
-        chardet \
-        fix \
-        idna    \
-        lxml    \
-        multitasking    \
-        numpy   \
-        pandas  \
-        pandas-datareader \
-        python-dateutil \
-        pytz    \
-        requests    \
-        six \
-        urllib3 \
-        tensorflow
 
-COPY src/* src/
+RUN pip install -r linux.pip
+
+CMD [ "python", "./main.py"]
+
+#To build
+#docker build -t python-stonks
+
+#To run without user input
+#docker run python-stonks
+
+#To run with user input
+#docker run -t -i python-stonks
