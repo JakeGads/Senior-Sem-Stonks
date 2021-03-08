@@ -3,10 +3,56 @@
     <head>
         <meta charset="UTF-8">
         <title>First Flask App</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     </head>
     <body>
-        <p>
-            Testing this out
-        </p>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <h1 style="text-align: center; text-decoration: underline;">
+                        <strong>
+                            Stonks Bot
+                        </strong>
+                    </h1>
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-md-1">Tag: </div>
+                <div class="col-md-1">
+                    <input type="text" id="tagTB" />
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-md-1">Start Date: </div>
+                <div class="col-md-1">
+                    <input type="date" id="startDate" />
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-md-1">End Date: </div>
+                <div class="col-md-1">
+                    <input type="date" id="endDate" />
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-md-1"></div>
+                <div class="col-md-1">
+                    <button>
+                        Submit
+                    </button>
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-md-1">Graph: </div>
+                <div class="col-md-10" style="border: black solid 3px; height: 500px; width: 500px;">
+                    <img src="" />
+                </div>
+            </div>
+        </div>
     </body>
 </html>
