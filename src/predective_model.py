@@ -8,7 +8,21 @@ import datetime as dt
 import numpy as np
 import tensorflow as tf # This code has been tested with TensorFlow 1.6
 from sklearn.preprocessing import MinMaxScaler
+import os
 
+def clear_static():
+    for root, dirs, files in os.walk('src/static'):
+        for file in files:
+            #append the file name to the list
+            print(os.path.join(root,file))
+            os.remove(os.path.join(root,file))
+    
+    for root, dirs, files in os.walk('static'):
+        for file in files:
+            #append the file name to the list
+            print(os.path.join(root,file))
+            os.remove(os.path.join(root,file))
+    
 def get_stock_data(tag: str, start_date: dt.datetime, end_date: dt.datetime) -> pd.core.frame.DataFrame:
     # forces tag into a list
     tag = [tag]
@@ -30,8 +44,8 @@ def get_stock_data(tag: str, start_date: dt.datetime, end_date: dt.datetime) -> 
         print("errord")
         return pd.DataFrame()
 
-
 def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end_date = dt.datetime.today()):
+    clear_static()
     df = get_stock_data(tag, start_date, end_date)
     
     high_prices = df.loc[:,'High'].values
@@ -119,7 +133,12 @@ def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end
     plt.xlabel('Date')
     plt.ylabel('Mid Price')
     plt.legend(fontsize=12)
-    plt.show()
+    try:
+        plt.savefig(f'../img/{tag}')
+        plt.savefig(f'static/{tag}')
+    except :
+        plt.savefig(f'img/{tag}')
+        plt.savefig(f'src/static/{tag}')
 
 if __name__ == '__main__':
     get_predictive_model('gme')
