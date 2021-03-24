@@ -9,6 +9,8 @@ import numpy as np
 import tensorflow as tf # This code has been tested with TensorFlow 1.6
 from sklearn.preprocessing import MinMaxScaler
 import os
+from platform import system as operating_system
+
 
 def clear_static():
     for root, dirs, files in os.walk('src/static'):
@@ -134,11 +136,11 @@ def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end
     plt.ylabel('Mid Price')
     plt.legend(fontsize=12)
     try:
-        plt.savefig(f'../img/{tag}')
-        plt.savefig(f'static/{tag}')
+        plt.savefig(f'..\\img\\{tag}' if operating_system() == 'Windows' else f'../img/{tag}')
+        plt.savefig(f'static\\{tag}' if operating_system() == 'Windows' else f'static/{tag}')
     except :
-        plt.savefig(f'img/{tag}')
-        plt.savefig(f'src/static/{tag}')
+        plt.savefig(f'img\\{tag}' if operating_system() == 'Windows' else f'img/{tag}')
+        plt.savefig(f'src\\static\\{tag}' if operating_system() == 'Windows' else f'src/static/{tag}')
 
 if __name__ == '__main__':
     get_predictive_model('gme')
