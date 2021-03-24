@@ -86,7 +86,6 @@ def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end
     # exponential moving average
     # very accurate, much wow
 
-    # TODO dynamic
     window_size = int(size * .1)
     N = train_data.size
 
