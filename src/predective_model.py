@@ -27,6 +27,7 @@ def get_stock_data(tag: str, start_date: dt.datetime, end_date: dt.datetime) -> 
         return data
     except :
         # if the data is wrong, return a blank one 
+        print("errord")
         return pd.DataFrame()
 
 
@@ -75,7 +76,6 @@ def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end
     EMA = 0.0
     gamma = 0.1
     
-    # TODO dynamic
     for ti in range(size):
         EMA = gamma*train_data[ti] + (1-gamma)*EMA
         train_data[ti] = EMA
