@@ -47,7 +47,6 @@ def get_stock_data(tag: str, start_date: dt.datetime, end_date: dt.datetime) -> 
         return pd.DataFrame()
 
 def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end_date = dt.datetime.today()):
-    clear_static()
     df = get_stock_data(tag, start_date, end_date)
     
     high_prices = df.loc[:,'High'].values
