@@ -7,5 +7,5 @@
         "xticks",
         "ylabel"
     ],
-    "python.pythonPath": "/Users/jakeg/source/repo/Senior-Sem-Stonks/env/bin/python3.7"
+    "python.pythonPath": "env\\Scripts\\python.exe"
 }
