@@ -16,13 +16,14 @@ def index():
     home()
 
 @app.route('/index/<tags>/<start_date>/<end_date>')
-def home(tags:list, start_date: dt, end_date: dt):
+def home(tags:list = [], start_date: dt = dt.now(), end_date: dt = dt.now()):
     clear_static()
     
     data = []
 
     for i in tags.split(','):
         data.append(tag_data(i, start_date, end_date, predective_model(i, start_date. end_date)))
+        
     return render_template('index.html')
 
 if __name__ == '__main__':

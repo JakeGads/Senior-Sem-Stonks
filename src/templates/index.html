@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>First Flask App</title>
+        <title>Stock Estimator</title>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     </head>
     <body>
@@ -16,6 +16,7 @@
                     </h1>
                 </div>
             </div>
+            
             <br />
             <div class="row">
                 <div class="col-md-1">Tag: </div>
@@ -47,12 +48,15 @@
                 </div>
             </div>
             <br />
+            {%for i in range(0, length)%}
             <div class="row">
-                <div class="col-md-1">Graph: </div>
+                <div class="col-md-1">Graph: {{data[i].tag}}</div>
                 <div class="col-md-10" style="border: black solid 3px; height: 500px; width: 500px;">
-                    <img src="" />
+                    <img src={{data[i].img}} />
                 </div>
+                <!-- we will add more information for each comparison here-->
             </div>
+            {%endfor%}
         </div>
     </body>
 </html>
