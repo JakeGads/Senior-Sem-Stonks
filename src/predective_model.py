@@ -134,11 +134,15 @@ def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end
     plt.xlabel('Date')
     plt.ylabel('Mid Price')
     plt.legend(fontsize=12)
+    
+    save_loc = f'..\\img\\{tag}' if operating_system() == 'Windows' else f'../img/{tag}'
+
     try:
-        plt.savefig(f'..\\img\\{tag}' if operating_system() == 'Windows' else f'../img/{tag}')
+        plt.savefig(save_loc)
         plt.savefig(f'static\\{tag}' if operating_system() == 'Windows' else f'static/{tag}')
     except :
-        plt.savefig(f'img\\{tag}' if operating_system() == 'Windows' else f'img/{tag}')
+        save_loc = f'img\\{tag}' if operating_system() == 'Windows' else f'img/{tag}'
+        plt.savefig(save_loc)
         plt.savefig(f'src\\static\\{tag}' if operating_system() == 'Windows' else f'src/static/{tag}')
 
 if __name__ == '__main__':
