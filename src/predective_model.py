@@ -1,15 +1,43 @@
 from pandas_datareader import data as pdr
-
-import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
-plt.style.use('dark_background')
-from keras.preprocessing.text import Tokenizer
-from keras.preprocessing.sequence import pad_sequences
-from sklearn.model_selection import train_test_split
-from keras.utils import to_categorical
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Embedding, LSTM, GlobalMaxPooling1D, SpatialDropout1D
+
+import numpy as np 
+import torch
+import matplotlib.pyplot as plt
+
+import os
+from platform import system as operating_system
+import datetime as dt
+from tqdm import tqdm
+
+from torch.utils.data import Dataset
+from torch.utils.data import DataLoader 
+
+from torch import nn
+
+class timeseries(Dataset):
+    def __init__(self,x,y):
+        self.x = torch.tensor(x,dtype=torch.float32)
+        self.y = torch.tensor(y,dtype=torch.float32)
+        self.len = x.shape[0]
+
+    def __getitem__(self,idx):
+        return self.x[idx],self.y[idx]
+  
+    def __len__(self):
+        return self.len
+
+class neural_network(nn.Module):
+    def __init__(self):
+        super(neural_network,self).__init__()
+        self.lstm = nn.LSTM(input_size=1,hidden_size=5,num_layers=1,batch_first=True)
+        self.fc1 = nn.Linear(in_features=5,out_features=1)
+
+    def forward(self,x):
+        output,_status = self.lstm(x)
+        output = output[:,-1,:]
+        output = self.fc1(torch.relu(output))
+        return output
 
 def clear_static():
     for root, dirs, files in os.walk('src/static'):
@@ -35,7 +63,7 @@ def get_stock_data(tag: str, start_date: dt.datetime, end_date: dt.datetime) -> 
         data.reset_index(inplace=True,drop=False)
         # create a shorter data string
         data['Date_String'] = data['Date'].dt.strftime('%Y-%m-%d')
-        data = data.drop(["Adj Close", "Volume"], axis = 1)
+        # data = data.drop(["Adj Close", "Volume"], axis = 1)
 
 
         # returns the data
@@ -48,9 +76,54 @@ def get_stock_data(tag: str, start_date: dt.datetime, end_date: dt.datetime) -> 
 def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end_date = dt.datetime.today()):
     df = get_stock_data(tag, start_date, end_date)
 
-    df_train = df[len(df)*.75:]
-    df_test = df[:len(df)*.24]
+    y = np.array(df[['Close']])
+    x = np.array(df['Date'].apply(lambda x: x.toordinal()))
 
+    x_train = np.array(x[int(len(x) * .75):])
+    x_test = np.array(x[:int(len(y) * .75)])
+
+    y_train = np.array(y[int(len(y) * .75):])
+    y_test =  np.array(y[:int(len(y) * .75)])
+    
+    dataset = timeseries(x,y)
+    train_loader = DataLoader(dataset,shuffle=True,batch_size=100)
+
+    model = neural_network()
+
+    # optimizer , loss
+    criterion = torch.nn.MSELoss()
+    optimizer = torch.optim.Adam(model.parameters(),lr=0.0001)
+    epochs = 1500
+
+    # finding a good shape size
+
+    size = 1,1
+
+
+
+    for i in tqdm(range(epochs)):
+        for j,data in enumerate(train_loader):
+            size = len(data[:][0])
+            try:
+                y_pred = model(data[:][0].view(-1,25,1)).reshape(-1)
+            except:
+                y_pred = model(data[:][0].view(-1,13,1)).reshape(-1)
+                continue
+
+            loss = criterion(y_pred,data[:][1])
+            loss.backward()
+            optimizer.step()
+        
+
+    test_set = timeseries(x_test,y_test)
+    test_pred = model(test_set[:][0].view(-1,1,1)).view(-1)
+    plt.plot(test_pred.detach().numpy(),label='predicted')
+    plt.plot(test_set[:][1].view(-1),label='original')
+    
+    plt.legend()
+    plt.show()
+    
+    
     # plt.figure(figsize = (14,7))
     # plt.plot(range(df.shape[0]),all_mid_data,color='b',label='True')
     # plt.plot(range(0,N),run_avg_predictions,color='orange', label='Prediction')
@@ -70,4 +143,4 @@ def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end
     #     plt.savefig(f'src\\static\\{tag}' if operating_system() == 'Windows' else f'src/static/{tag}')
 
 if __name__ == '__main__':
-    get_predictive_model('gme')
+    get_predictive_model('gme', pd.to_datetime('2010-01-01'))
