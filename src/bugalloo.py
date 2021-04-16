@@ -52,7 +52,7 @@ def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end
     # https://machinelearningmastery.com/tutorial-first-neural-network-python-keras/
     
     model = Sequential()
-    model.add(Dense(12,input_dim=df.shape[1],activation='relu'))
+    model.add(Dense(12,input_dim=y.shape[1],activation='relu'))
     model.add(Dense(8, activation='relu'))
     model.add(Dense(1, activation='sigmoid'))
 
@@ -60,7 +60,7 @@ def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end
     
     model.fit(X, y, epochs=150, batch_size=10)
 
-    model, accuracy = model.evaluate(X, y)
+    _, accuracy = model.evaluate(X, y)
     print('Accuracy: %.2f' % (accuracy*100))
 
     predictions = model.predict(X)
