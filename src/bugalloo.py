@@ -17,21 +17,33 @@ import pandas_datareader as pdr
 import pandas as pd
 
 def get_stock_data(tag: str, start_date: dt.datetime, end_date: dt.datetime) -> pd.core.frame.DataFrame:
+
+    for i in ['data', 'img']:
+        os.system(f'mkdir {i}')
     # forces tag into a list
     tag = [tag]
     # attempts to pull the data
     try:
         # get it from yahoo
         data = pdr.get_data_yahoo(tag, start=start_date, end=end_date)
-        # reset the index to remove extra symbols
-        data.reset_index(inplace=True,drop=False)
-        # create a shorter data string
-        data['Date_String'] = data['Date'].dt.strftime('%Y-%m-%d')
+        
+        data.reset_index(inplace=True,drop=True)
         
         data.to_csv(f'data/{tag[0]}.csv')
 
+        with open(f'data/{tag[0]}.csv', 'r') as in_file:
+            lines = in_file.readlines()
+        with open(f'data/{tag[0]}.csv', 'w+') as out_file:
+            del lines[1]
+            lines[0] = lines[0].replace('Attributes', 'Date')
+            for i in lines:
+                out_file.write(i)
+        
+        data = pd.read_csv(f'data/{tag[0]}.csv')
+
         # returns the data
         return data
+
     except :
         # if the data is wrong, return a blank one
         
@@ -39,91 +51,96 @@ def get_stock_data(tag: str, start_date: dt.datetime, end_date: dt.datetime) -> 
 
 
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
-
+import pandas as pd
+from matplotlib.pylab import rcParams
+rcParams['figure.figsize']=20,10
+from keras.models import Sequential
+from keras.layers import LSTM,Dropout,Dense
 from sklearn.preprocessing import MinMaxScaler
-from keras.models import Sequential, load_model
-from keras.layers import LSTM, Dense, Dropout
-from statsmodels.tsa.holtwinters import SimpleExpSmoothing
+
 from platform import system as operating_system
 
 def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end_date = dt.datetime.today()):
 
-    def create_dataset(df):
-        x = []
-        y = []
-        for i in range(50, df.shape[0]):
-            x.append(df[i-50:i, 0])
-            y.append(df[i, 0])
-        x = np.array(x)
-        y = np.array(y)
-        return x,y
-
     df = get_stock_data(tag, start_date, end_date)
-    if df.empty:
-        return False
-    df = df['Close'].values
 
-    dataset_train = np.array(df[:int(df.shape[0]*0.8)])
-    dataset_test = np.array(df[int(df.shape[0]*0.8):])
-
-    scaler = MinMaxScaler(feature_range=(0,1))
-    dataset_train = scaler.fit_transform(dataset_train)
-    dataset_test = scaler.transform(dataset_test)
-
-    x_train, y_train = create_dataset(dataset_train)
-    x_test, y_test = create_dataset(dataset_test)
-
-    model = Sequential()
-    model.add(LSTM(units=96, return_sequences=True, input_shape=(x_train.shape[1], 1)))
-    model.add(Dropout(0.2))
-    model.add(LSTM(units=96, return_sequences=True))
-    model.add(Dropout(0.2))
-    model.add(LSTM(units=96, return_sequences=True))
-    model.add(Dropout(0.2))
-    model.add(LSTM(units=96))
-    model.add(Dropout(0.2))
-    model.add(Dense(units=1))
-
-    x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
-    x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1))
-
-    model.compile(loss='mean_squared_error', optimizer='adam')
-
-    model.fit(x_train, y_train, epochs=25, batch_size=32)
-    model.save('stock_prediction.h5') # we have to save no I don't know why it just seems to strengthen the model
-    model = load_model('stock_prediction.h5')
-
-    predictions = model.predict(x_test)
-    predictions = scaler.inverse_transform(predictions)
-    y_test_scaled = scaler.inverse_transform(y_test.reshape(-1, 1))
-
-    fig, ax = plt.subplots(figsize=(16,8))
-    ax.set_facecolor('#000041')
-    ax.plot(y_test_scaled, color='red', label='Original price')
-    plt.plot(predictions, color='cyan', label='Predicted price')
+    df.index = df["Date"]
     
-    predictor = SimpleExpSmoothing(predictions).fit()
+    data=df.sort_index(ascending=True,axis=0)
+    new_dataset=pd.DataFrame(index=range(0,len(df)),columns=['Date','Close'])
+    for i in range(0,len(data)):
+        new_dataset["Date"][i]=data['Date'][i]
+        new_dataset["Close"][i]=data["Close"][i]
 
-    plt.xlabel('Date Ordinal')
-    plt.ylabel('Closing Price')
-    plt.legend()
+    final_dataset=new_dataset.values
+    final_dataset_new = np.empty(np.shape(final_dataset))
+    for i in range (0, len(final_dataset)):
+        final_dataset_new[i][0] = final_dataset[i][0]
+        final_dataset_new[i][1] = final_dataset[i][1]
     
+    scaler=MinMaxScaler(feature_range=(0,1))
+    final_dataset=new_dataset.values
+    train_split = int(len(final_dataset) * .80)
+    train_data=final_dataset[0:train_split,:]
+    valid_data=final_dataset[train_split:,:]
+    new_dataset.index=new_dataset.Date
+    new_dataset.drop("Date",axis=1,inplace=True)
+    scaler=MinMaxScaler(feature_range=(0,1))
+    scaled_data=scaler.fit_transform(final_dataset_new)
+    x_train_data,y_train_data=[],[]
+    for i in range(60,len(train_data)):
+        x_train_data.append(scaled_data[i-60:i,0])
+        y_train_data.append(scaled_data[i,0])
+        
+    x_train_data,y_train_data=np.array(x_train_data),np.array(y_train_data)
+    x_train_data=np.reshape(x_train_data,(x_train_data.shape[0],x_train_data.shape[1],1))
 
+    lstm_model=Sequential()
+    lstm_model.add(LSTM(units=50,return_sequences=True,input_shape=(x_train_data.shape[1],1)))
+    lstm_model.add(LSTM(units=50))
+    lstm_model.add(Dense(1))
+    inputs_data=new_dataset[len(new_dataset)-len(valid_data)-60:].values
+    inputs_data=inputs_data.reshape(-1,1)
+    try:
+        inputs_data=scaler.transform(inputs_data)   
+    except :
+        None
+    lstm_model.compile(loss='mean_squared_error',optimizer='adam')
+    lstm_model.fit(x_train_data,y_train_data,epochs=1,batch_size=1,verbose=2)
+
+    x_test=[]
+    for i in range(60,inputs_data.shape[0]):
+        x_test.append(inputs_data[i-60:i,0])
+    x_test=np.float32(np.array(x_test))
+    x_test=np.reshape(x_test,(x_test.shape[0],x_test.shape[1],1))
+    
+    predicted_closing_price=lstm_model.predict(x_test)
+    try:
+        predicted_closing_price=scaler.inverse_transform(predicted_closing_price)
+    except:
+        None
+
+    train_data=new_dataset[:train_split]
+    valid_data=new_dataset[train_split:]
+    valid_data['Predictions']=predicted_closing_price
+    plt.plot(train_data["Close"])
+    plt.plot(valid_data[['Close',"Predictions"]])
+    
     loc = f'..\\img\\{tag}' if operating_system() == 'Windows' else f'../img/{tag}'
     try:
         plt.savefig(loc)
-        plt.savefig(f'static\\{tag}' if operating_system() == 'Windows' else f'static/{tag}')
+        # plt.savefig(f'static\\{tag}' if operating_system() == 'Windows' else f'static/{tag}')
     except :
         loc = f'img\\{tag}' if operating_system() == 'Windows' else f'img/{tag}'
         plt.savefig(loc)
-        plt.savefig(f'src\\static\\{tag}' if operating_system() == 'Windows' else f'src/static/{tag}')
+        # plt.savefig(f'src\\static\\{tag}' if operating_system() == 'Windows' else f'src/static/{tag}')
 
-    
-    arr = predictor.forecast(365)
-
-    return os.path.abspath(loc), {"1 day": arr[0], "7 days": arr[6], "1 month": arr[29], "6 months": arr[(30 * 6) - 1], "1 year": arr[364]} # TODO add the accuracy
+    plt.close()
+    return os.path.abspath(loc) 
 
 if __name__ == '__main__':
     print(get_predictive_model('VHC', pd.to_datetime('2018-01-01')))
+    print(get_predictive_model('UIS', pd.to_datetime('2018-01-01')))
+    print(get_predictive_model('NTDOY', pd.to_datetime('2018-01-01')))
+    print(get_predictive_model('GME', pd.to_datetime('2018-01-01')))
