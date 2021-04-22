@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 
 import os
 from platform import system as operating_system
+from math import ceil
 import datetime as dt
 from tqdm import tqdm
 
@@ -99,15 +100,22 @@ def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end
 
     size = 1,1
 
-
+    def find_size(x:int):
+        for i in range(1, ceil(x/2)):
+            for j in range(1, ceil(x/2)):
+                if i * j == x:
+                    return x
+                    # return max([i,j])
+        
+        return x
 
     for i in tqdm(range(epochs)):
         for j,data in enumerate(train_loader):
-            size = len(data[:][0])
+            size = find_size(len(data[:][0]))
             try:
-                y_pred = model(data[:][0].view(-1,25,1)).reshape(-1)
+                y_pred = model(data[:][0].view(1,size,1)).reshape(-1)
             except:
-                y_pred = model(data[:][0].view(-1,13,1)).reshape(-1)
+                print('size:', size)
                 continue
 
             loss = criterion(y_pred,data[:][1])
@@ -143,4 +151,4 @@ def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end
     #     plt.savefig(f'src\\static\\{tag}' if operating_system() == 'Windows' else f'src/static/{tag}')
 
 if __name__ == '__main__':
-    get_predictive_model('gme', pd.to_datetime('2010-01-01'))
+    get_predictive_model('gme', pd.to_datetime('2015-01-01'))

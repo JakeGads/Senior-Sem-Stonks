@@ -34,117 +34,83 @@ def get_stock_data(tag: str, start_date: dt.datetime, end_date: dt.datetime) -> 
         return data
     except :
         # if the data is wrong, return a blank one
-        print("errord")
+        
         return pd.DataFrame()
 
 
 import numpy as np
-from tqdm import tqdm as loading_bar
-
-import matplotlib.pyplot as plt
 import pandas as pd
-import datetime as dt
-import numpy as np
-import tensorflow as tf # This code has been tested with TensorFlow 1.6
-from sklearn.preprocessing import MinMaxScaler
-from platform import system as operating_system
-from statsmodels.tsa.api import SimpleExpSmoothing
+import matplotlib.pyplot as plt
 
+from sklearn.preprocessing import MinMaxScaler
+from keras.models import Sequential, load_model
+from keras.layers import LSTM, Dense, Dropout
+from statsmodels.tsa.holtwinters import SimpleExpSmoothing
+from platform import system as operating_system
 
 def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end_date = dt.datetime.today()):
+
+    def create_dataset(df):
+        x = []
+        y = []
+        for i in range(50, df.shape[0]):
+            x.append(df[i-50:i, 0])
+            y.append(df[i, 0])
+        x = np.array(x)
+        y = np.array(y)
+        return x,y
+
     df = get_stock_data(tag, start_date, end_date)
+    if df.empty:
+        return False
+    df = df['Close'].values
+
+    dataset_train = np.array(df[:int(df.shape[0]*0.8)])
+    dataset_test = np.array(df[int(df.shape[0]*0.8):])
+
+    scaler = MinMaxScaler(feature_range=(0,1))
+    dataset_train = scaler.fit_transform(dataset_train)
+    dataset_test = scaler.transform(dataset_test)
+
+    x_train, y_train = create_dataset(dataset_train)
+    x_test, y_test = create_dataset(dataset_test)
+
+    model = Sequential()
+    model.add(LSTM(units=96, return_sequences=True, input_shape=(x_train.shape[1], 1)))
+    model.add(Dropout(0.2))
+    model.add(LSTM(units=96, return_sequences=True))
+    model.add(Dropout(0.2))
+    model.add(LSTM(units=96, return_sequences=True))
+    model.add(Dropout(0.2))
+    model.add(LSTM(units=96))
+    model.add(Dropout(0.2))
+    model.add(Dense(units=1))
+
+    x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
+    x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1))
+
+    model.compile(loss='mean_squared_error', optimizer='adam')
+
+    model.fit(x_train, y_train, epochs=25, batch_size=32)
+    model.save('stock_prediction.h5') # we have to save no I don't know why it just seems to strengthen the model
+    model = load_model('stock_prediction.h5')
+
+    predictions = model.predict(x_test)
+    predictions = scaler.inverse_transform(predictions)
+    y_test_scaled = scaler.inverse_transform(y_test.reshape(-1, 1))
+
+    fig, ax = plt.subplots(figsize=(16,8))
+    ax.set_facecolor('#000041')
+    ax.plot(y_test_scaled, color='red', label='Original price')
+    plt.plot(predictions, color='cyan', label='Predicted price')
     
-    # high_prices = df.loc[:,'High'].values
-    # low_prices = df.loc[:,'Low'].values
-    close_values = df.loc[:, 'Close'].values
+    predictor = SimpleExpSmoothing(predictions).fit()
+
+    plt.xlabel('Date Ordinal')
+    plt.ylabel('Closing Price')
+    plt.legend()
     
-    # 11_000
-    size = int(len(close_values) * (3/4))
-    train_data = close_values[:size]
-    test_data = close_values[size:]
-    
-    # Scale the data to be between 0 and 1
-    scaler = MinMaxScaler()
-    train_data = train_data.reshape(-1,1)
-    test_data = test_data.reshape(-1,1)
 
-    
-    smoothing_window_size = len(close_values) - size
-    
-    for di in range(0, int(size * .9),smoothing_window_size):
-        scaler.fit(train_data[di:di+smoothing_window_size,:])
-        train_data[di:di+smoothing_window_size,:] = scaler.transform(train_data[di:di+smoothing_window_size,:])
-
-    # You normalize the last bit of remaining data
-    try:
-        scaler.fit(train_data[smoothing_window_size:,:])
-    except :
-        print('All data already fixed')
-
-    try:
-        train_data[di+smoothing_window_size:,:] = scaler.transform(train_data[di+smoothing_window_size:,:])
-    except :
-        None
-
-    # Reshape both train and test data
-    train_data = train_data.reshape(-1)
-
-    # Normalize test data
-    test_data = scaler.transform(test_data).reshape(-1)
-
-    # Exponential Smoothing
-    EMA = 0.0
-    gamma = 0.1
-    
-    for ti in range(size):
-        EMA = gamma*train_data[ti] + (1-gamma)*EMA
-        train_data[ti] = EMA
-
-    # saving here to make visualizations easier later
-    all_close_data = np.concatenate([train_data,test_data],axis=0)
-
-    # exponential moving average
-    # very accurate, much wow
-
-    window_size = int(size * .1)
-    N = train_data.size
-
-    run_avg_predictions = []
-    run_avg_x = []
-
-    mse_errors = []
-
-    running_mean = 0.0
-    run_avg_predictions.append(running_mean)
-
-    decay = 0.5
-
-    date = ''
-
-    for pred_idx in range(1,N):
-        if pred_idx >= N:
-              date = date + dt.timedelta(days=1)
-        else:
-            date = df.loc[pred_idx,'Date']
-
-        running_mean = running_mean*decay + (1.0-decay)*train_data[pred_idx-1]
-        run_avg_predictions.append(running_mean)
-        mse_errors.append((run_avg_predictions[-1]-train_data[pred_idx])**2)
-        run_avg_x.append(date)
-
-    print('MSE error for EMA averaging: %.5f'%(0.5*np.mean(mse_errors)))
-
-    predictor = SimpleExpSmoothing(run_avg_predictions).fit()
-
-    plt.figure(figsize = (14,7))
-    plt.plot(range(train_data.shape[0]),train_data,color='b',label='Train')
-    plt.plot(range(test_data.shape[0]),test_data,color='green',label='Test')
-
-    plt.plot(range(0,N),run_avg_predictions,color='orange', label='Prediction')
-    plt.xticks(range(0,df.shape[0],50),df['Date_String'].loc[::50],rotation=45)
-    plt.xlabel('Date')
-    plt.ylabel('Mid Price')
-    plt.legend(fontsize=12)
     loc = f'..\\img\\{tag}' if operating_system() == 'Windows' else f'../img/{tag}'
     try:
         plt.savefig(loc)
@@ -154,8 +120,10 @@ def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end
         plt.savefig(loc)
         plt.savefig(f'src\\static\\{tag}' if operating_system() == 'Windows' else f'src/static/{tag}')
 
-    print(predictor)
+    
+    arr = predictor.forecast(365)
 
-    return os.path.abspath(loc), predictor.forecast(365)
+    return os.path.abspath(loc), {"1 day": arr[0], "7 days": arr[6], "1 month": arr[29], "6 months": arr[(30 * 6) - 1], "1 year": arr[364]} # TODO add the accuracy
+
 if __name__ == '__main__':
-    print(get_predictive_model('UIS', pd.to_datetime('2020-01-01')))
+    print(get_predictive_model('VHC', pd.to_datetime('2018-01-01')))
