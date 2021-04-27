@@ -1,6 +1,7 @@
-from flask import Flask, render_template
-from predective_model import clear_static, predective_model
+from flask import Flask, render_template, url_for, redirect
+from model import get_predictive_model
 from datetime import datetime as dt
+from pandas import to_datetime
 app = Flask(__name__)
 
 class tag_data:
@@ -8,23 +9,40 @@ class tag_data:
         self.tag = tag
         self.start = start
         self.end = end
+        self.img = url_for('static', filename=self.tag + '.png')
         self.data = data
 
+    def __repr__(self):
+        return f'''{self.tag}
+            {self.img}
+            {self.data}
+            '''
+        
+    
+    def __str__(self):
+        return self.__repr__()
 
 @app.route('/')
-def index():
-    home()
-
-@app.route('/index/<tags>/<start_date>/<end_date>')
-def home(tags:list = [], start_date: dt = dt.now(), end_date: dt = dt.now()):
-    clear_static()
-    
+@app.route('/home/')
+@app.route('/home/<tags>')
+@app.route('/home/<tags>/<start_date>')
+def home(tags:str = "GME", start_date: str = to_datetime("2018-01-01"), end_date: str = dt.now()):
+    if type(start_date) == type('string'):
+        start_date = to_datetime(start_date)
+    if type(end_date) == type('string'):
+        end_date = to_datetime(end_date)
     data = []
+    tags = tags.split('|')
+    for i in tags:
 
-    for i in tags.split(','):
-        data.append(tag_data(i, start_date, end_date, predective_model(i, start_date. end_date)))
-        
-    return render_template('index.html')
+        try:
+            data.append(tag_data(i, start_date, end_date, get_predictive_model(i, start_date, end_date)))
+        except:
+            data.append(tag_data(i, start_date, end_date, ['error.png', 'error  ']))
+    for i in data:
+        print(i)
+
+    return render_template('index.html', length=len(data), data=data)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()

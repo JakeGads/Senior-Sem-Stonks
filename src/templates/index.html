@@ -32,22 +32,17 @@
                 </div>
             </div>
             <br />
-            <div class="row">
-                <div class="col-md-1">End Date: </div>
-                <div class="col-md-1">
-                    <input type="date" id="endDate" />
-                </div>
-            </div>
             <br />
             <div class="row">
                 <div class="col-md-1"></div>
                 <div class="col-md-1">
-                    <button>
+                    <button id="btn">
                         Submit
                     </button>
                 </div>
             </div>
             <br />
+            
             {%for i in range(0, length)%}
             <div class="row">
                 <div class="col-md-1">Graph: {{data[i].tag}}</div>
@@ -59,4 +54,5 @@
             {%endfor%}
         </div>
     </body>
+    <script src={{url_for('static', filename='director.js')}}></script>
 </html>
