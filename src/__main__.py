@@ -1,5 +1,5 @@
 from flask import Flask, render_template, url_for, redirect
-from model import get_predictive_model
+from timeseries import get_predictive_model
 from datetime import datetime as dt
 from pandas import to_datetime
 app = Flask(__name__)
@@ -10,7 +10,7 @@ class tag_data:
         self.start = start
         self.end = end
         self.img = url_for('static', filename=self.tag + '.png')
-        self.data = data
+        self.data = [data]
 
     def __repr__(self):
         return f'''{self.tag}
@@ -32,7 +32,7 @@ def home(tags:str = "GME", start_date: str = to_datetime("2018-01-01"), end_date
     if type(end_date) == type('string'):
         end_date = to_datetime(end_date)
     data = []
-    tags = tags.split('|')
+    tags = tags.split(',')
     for i in tags:
 
         try:

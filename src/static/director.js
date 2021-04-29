@@ -5,15 +5,24 @@ document.getElementById('btn').onclick = function() {
     let start_date = document.getElementById('startDate').value;
     
     console.log(tags);
+    tags = tags.replace('$', '');
 
-    // if (tags=""){
-    //     location.href = "/";
-    // }
+    let replacements = [',', '\\', '/', '.', ' ', '\t'];
 
-    // if(start_date !== ""){
-    //     location.href = "index/" + tags + "/" + start_date;
-    // }
-    // else if (start_date === ""){
-    //     location.href = "index/" + tags;
-    // }   
+    replacements.forEach(function(i) {
+        while (tags.indexOf(i) == -1){
+            tags = tags.replace(i, '|');
+        }
+    });
+
+    if (tags=""){
+        location.href = "/";
+    }
+
+    if(start_date !== ""){
+        location.href = "index/" + tags + "/" + start_date;
+    }
+    else if (start_date === ""){
+        location.href = "index/" + tags;
+    }   
 }

@@ -1,4 +1,6 @@
 import os
+import subprocess
+
 def clear_static():
     for root, dirs, files in os.walk('src/static'):
         for file in files:
@@ -22,6 +24,12 @@ def get_stock_data(tag: str, start_date: dt.datetime, end_date: dt.datetime) -> 
 
     for i in ['data', 'img']:
         os.system(f'mkdir {i}')
+        if operating_system() == 'Windows':
+            os.system('cls')
+        else:
+            os.system('clear')
+    
+                
     # forces tag into a list
     tag = [tag]
     # attempts to pull the data
@@ -29,11 +37,15 @@ def get_stock_data(tag: str, start_date: dt.datetime, end_date: dt.datetime) -> 
         # get it from yahoo
         data = pdr.get_data_yahoo(tag, start=start_date, end=end_date)
         # generate a index
-        data.reset_index(inplace=True,drop=True)
         """
         Date,Adj Close,Close,High,Low,Open,Volume
+        df = df.reindex(columns=column_names)
+        ___
+        df = df[['favorite_color','grade','name','age']]
+        ___
+        df1 = pd.DataFrame(df1,columns=['Name','Gender','Score','Rounded_score'])
+
         """
-        new_data = data[]
         
         # write it out in the og format
         data.to_csv(f'data/{tag[0]}.csv')
@@ -44,16 +56,33 @@ def get_stock_data(tag: str, start_date: dt.datetime, end_date: dt.datetime) -> 
         
         # and manipulated before being exported
         with open(f'data/{tag[0]}.csv', 'w+') as out_file:
-            del lines[1]
+            
             lines[0] = lines[0].replace('Attributes', 'Date')
+            del lines[1:3]
+            
             for i in lines:
                 out_file.write(i)
         
-        # and loaded in as a dataframe and exported out as the function
-        return pd.read_csv(f'data/{tag[0]}.csv')
+        data = pd.read_csv(f'data/{tag[0]}.csv', index_col=0, parse_dates=True)
 
-    except :
+        data = data[['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume']]
+        # data["str_date"] = data["Date"]
+        # data["Date"] = data["Date"].apply(
+        #     lambda x: dt.datetime(
+        #             *list(
+        #                 map(
+        #                     int, x.split('-')
+        #                 )
+        #             )
+        #         ).toordinal()
+        #     )
+
+        # and loaded in as a dataframe and exported out as the function
+        return data
+
+    except Exception as e:
         # if the data is wrong, return a blank one
+        print(e)
         return pd.DataFrame()
 
 
@@ -65,14 +94,15 @@ rcParams['figure.figsize']=8,8
 from keras.models import Sequential
 from keras.layers import LSTM,Dropout,Dense
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
-
+from tqdm import tqdm
 from platform import system as operating_system
+
+
 
 import torch #pytorch
 import torch.nn as nn
 from torch.autograd import Variable
 from flask import url_for
-
 class LSTM1(nn.Module):
     def __init__(self, num_classes, input_size, hidden_size, num_layers, seq_length):
         super(LSTM1, self).__init__()
@@ -101,18 +131,17 @@ class LSTM1(nn.Module):
         out = self.fc(out) #Final Output
         return out
  
-def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end_date = dt.datetime.today(), locs =[-2, [2,6]]):
+def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end_date = dt.datetime.today()):
     # pull in data from 
+    
     df = get_stock_data(tag, start_date, end_date)
-
-
-    # generate the index
-    df.index = df["Date"]
-
-    # parse through for the trimmed dataset   
+    print(tag)
+    
     plt.style.use('ggplot')
-    X = df.iloc[:, :locs[0]]
-    y = df.iloc[:, locs[1]]
+    
+    X = df.iloc[:, :-1]
+    y = df.iloc[:, 5:6]
+    
 
     mm = MinMaxScaler()
     ss = StandardScaler()
@@ -120,7 +149,7 @@ def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end
     X_ss = ss.fit_transform(X)
     y_mm = mm.fit_transform(y)
 
-    size = int(len(X_ss) * .2) # replaces 200
+    size = int(len(X) - len(X) * .209) # replaces 200
 
     X_train = X_ss[:size, :]
     X_test = X_ss[size:, :]
@@ -137,7 +166,7 @@ def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end
     X_train_tensors_final = torch.reshape(X_train_tensors,   (X_train_tensors.shape[0], 1, X_train_tensors.shape[1]))
     X_test_tensors_final = torch.reshape(X_test_tensors,  (X_test_tensors.shape[0], 1, X_test_tensors.shape[1])) 
 
-    num_epochs = 1000 #1000 epochs
+    num_epochs = 7500 #1000 epochs
     learning_rate = 0.001 #0.001 lr
 
     input_size = 5 #number of features
@@ -151,7 +180,7 @@ def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end
     criterion = torch.nn.MSELoss()    # mean-squared error for regression
     optimizer = torch.optim.Adam(lstm1.parameters(), lr=learning_rate)    
 
-    for epoch in range(num_epochs):
+    for epoch in tqdm(range(num_epochs)):
         outputs = lstm1.forward(X_train_tensors_final) #forward pass
         optimizer.zero_grad() #caluclate the gradient, manually setting to 0
         
@@ -161,11 +190,9 @@ def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end
         loss.backward() #calculates the loss of the loss function
         
         optimizer.step() #improve from loss, i.e backprop
-        if epoch % 100 == 0:
-            print("Epoch: %d, loss: %1.5f" % (epoch, loss.item())) 
 
-    df_X_ss = ss.transform(df.iloc[:, :-2]) #old transformers
-    df_y_mm = mm.transform(df.iloc[:, -2:]) #old transformers
+    df_X_ss = ss.transform(df.iloc[:, :-1]) #old transformers
+    df_y_mm = mm.transform(df.iloc[:, -1:]) #old transformers
 
     df_X_ss = Variable(torch.Tensor(df_X_ss)) #converting to Tensors
     df_y_mm = Variable(torch.Tensor(df_y_mm))
@@ -182,38 +209,36 @@ def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end
         None
     
     dataY_plot = mm.inverse_transform(dataY_plot)
+    
     plt.figure(figsize=(10,6)) #plotting
-    plt.axvline(x=200, c='r', linestyle='--') #size of the training set
+    plt.axvline(x=size, c='r', linestyle='--') #size of the training set
 
     plt.plot(dataY_plot, label='Actual Data') #actual plot
     plt.plot(data_predict, label='Predicted Data') #predicted plot
     plt.title('Time-Series Prediction')
-    plt.legend()
-    
+    plt.legend()    
+
 
     save_loc = f'..\\img\\{tag}' if operating_system() == 'Windows' else f'../img/{tag}'
 
     try:
         plt.savefig(save_loc)
-        plt.savefig(f'static\\{tag}' if operating_system() == 'Windows' else f'static/{tag}')
+        save_loc = f'static\\{tag}' if operating_system() == 'Windows' else f'static/{tag}'
+        plt.savefig(save_loc)
     except :
         save_loc = f'img\\{tag}' if operating_system() == 'Windows' else f'img/{tag}'
         plt.savefig(save_loc)
-        plt.savefig(f'src\\static\\{tag}' if operating_system() == 'Windows' else f'src/static/{tag}')
+        save_loc = f'src\\static\\{tag}' if operating_system() == 'Windows' else f'src/static/{tag}'
+        plt.savefig(save_loc)
     
     try:
-        return url_for("static", filename=f'{tag}.png')
+        return url_for("static", filename=f'{tag}.png'), len(X)
     except:
-        return save_loc
+        return save_loc, len(X)
 if __name__ == '__main__':
-    for i in range(0,6):
+    for i in ['GME', 'NTDOY', 'UIS', 'VHC']:
         print(
-            get_predictive_model('VHC', pd.to_datetime('2018-01-01'), locs=[-2, [i,i]])
+            get_predictive_model(i, pd.to_datetime('2020-01-01'))
+            # dt.datetime.now() - dt.timedelta(days=368))
         )
-        plt.savefig(f'{i}.png')
-        for j in range(0,6):
-            print(
-                get_predictive_model('VHC', pd.to_datetime('2018-01-01'), locs=[-2, [i, j]])
-            )
-            plt.savefig(f'{i}|{j}.png')
-    
+        
