@@ -1,6 +1,7 @@
 import os
 import subprocess
 from platform import system as operating_system
+import threading
 
 from numpy.lib.function_base import average
 def clear_static():
@@ -209,7 +210,7 @@ def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end
     # Compile the model
     model.compile(optimizer='adam', loss='mean_squared_error')
 
-    epochs = 5
+    epochs = 3  
     early_stop = EarlyStopping(monitor='loss', patience=2, verbose=1)
     history = model.fit(x_train, y_train, batch_size=16, 
                         epochs=epochs, callbacks=[early_stop])
@@ -245,7 +246,7 @@ def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end
     train = train[train['Date'] > display_start_date]
 
     # Visualize the data
-    fig, ax1 = plt.subplots(figsize=(22, 10), sharex=True)
+    plt.subplots(figsize=(10, 8), sharex=True)
     xt = train['Date']; yt = train[["Close"]]
     xv = valid['Date']; yv = valid[["Close", "Prediction"]]
     plt.title("Predictions vs Actual Values", fontsize=20)
@@ -315,11 +316,12 @@ def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end
     
     
     expected = f'The average predicted close price after 7 days is {round(average(values), 1)} which is ({a}{average(percentages)}%) change'
-
+    print(f'finished {tag}')
     try:
         return url_for("static", filename=f'{tag}.png'), expected
     except:
         return save_loc, expected
+
 if __name__ == '__main__':
     for i in ['GME']:
         print(

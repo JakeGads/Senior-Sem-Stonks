@@ -1,6 +1,7 @@
 from flask import Flask, render_template, url_for, redirect
-from timeseries import get_predictive_model
+from model import get_predictive_model
 from datetime import datetime as dt
+import concurrent.futures
 from pandas import to_datetime
 app = Flask(__name__)
 
@@ -34,13 +35,17 @@ def home(tags:str = "GME", start_date: str = to_datetime("2018-01-01"), end_date
     data = []
     tags = tags.split(',')
     for i in tags:
-
         try:
+            # thread = ''
+            # with concurrent.futures.ThreadPoolExecutor() as executor:
+            #     thread = executor.submit(get_predictive_model, [i, start_date, end_date])
             data.append(tag_data(i, start_date, end_date, get_predictive_model(i, start_date, end_date)))
         except:
             data.append(tag_data(i, start_date, end_date, ['error.png', 'error  ']))
     for i in data:
         print(i)
+
+    
 
     return render_template('index.html', length=len(data), data=data)
 
