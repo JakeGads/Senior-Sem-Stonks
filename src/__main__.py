@@ -1,8 +1,9 @@
 from flask import Flask, render_template, url_for, redirect
-from model import get_predictive_model
+from timeseries import get_predictive_model
 from datetime import datetime as dt
 import concurrent.futures
 from pandas import to_datetime
+
 app = Flask(__name__)
 
 class tag_data:
