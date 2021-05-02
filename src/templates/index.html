@@ -23,8 +23,8 @@
 
         <div>
             {%for i in range(0, length)%}
-            <div class="data_point">
-                <h2 style="text-align: center;">Graph: {{data[i].tag}}</h2>
+            <div class="point">
+                <h2 style="text-align: center;">{{data[i].tag}}</h2>
                 <div style="text-align: center; border: black solid 3px; height: 900px; width: 1000px;">
                     <img src={{data[i].img}} alt="the graph for the {{data[i].tag}} data"/>
                     <p>{{data[i].data[1]}}</p>
