@@ -210,7 +210,7 @@ def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end
     # Compile the model
     model.compile(optimizer='adam', loss='mean_squared_error')
 
-    epochs = 3  
+    epochs = 5  
     early_stop = EarlyStopping(monitor='loss', patience=2, verbose=1)
     history = model.fit(x_train, y_train, batch_size=16, 
                         epochs=epochs, callbacks=[early_stop])
@@ -315,7 +315,7 @@ def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end
     
     
     
-    expected = f'The average predicted close price after 7 days is {round(average(values), 1)} which is ({a}{average(percentages)}%) change'
+    expected = f'The average predicted close price after 7 days is {round(average(values), 1)}({a}{average(percentages)}%)'
     print(f'finished {tag}')
     try:
         return url_for("static", filename=f'{tag}.png'), expected

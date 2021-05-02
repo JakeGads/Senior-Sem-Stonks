@@ -1,17 +1,21 @@
 FROM python:3.7
 
-ADD main.py .
-ADD predective_model.py .
-ADD linux.pip .
+ADD src/__main__.py .
+ADD src/model.py .
+ADD src/timeseries.py .
+ADD req.pip .
+
+EXPOSE 5000/udp
+EXPOSE 5000/tcp
 
 RUN python -m pip install --upgrade pip
 
-RUN pip install -r linux.pip
+RUN pip install -r req.pip
 
-CMD [ "python", "./main.py"]
+CMD [ "python", "./__main__.py"]
 
 #To build
-#docker build -t python-stonks
+#docker build -t python-stonks .
 
 #To run without user input
 #docker run python-stonks

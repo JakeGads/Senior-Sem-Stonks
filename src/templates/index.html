@@ -3,55 +3,36 @@
     <head>
         <meta charset="UTF-8">
         <title>Stock Estimator</title>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <link href={{url_for('static', filename="index.css")}} rel="stylesheet" type="text/css">
+
     </head>
     <body>
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-12">
-                    <h1 style="text-align: center; text-decoration: underline;">
-                        <strong>
-                            Stonks Bot
-                        </strong>
-                    </h1>
-                </div>
-            </div>
-            
-            <br />
-            <div class="row">
-                <div class="col-md-1">Tag: </div>
-                <div class="col-md-1">
-                    <input type="text" id="tagTB" />
-                </div>
-            </div>
-            <br />
-            <div class="row">
-                <div class="col-md-1">Start Date: </div>
-                <div class="col-md-1">
-                    <input type="date" id="startDate" />
-                </div>
-            </div>
-            <br />
-            <br />
-            <div class="row">
-                <div class="col-md-1"></div>
-                <div class="col-md-1">
-                    <button id="btn">
-                        Submit
-                    </button>
-                </div>
-            </div>
-            <br />
-            
+        <h1 style="text-align: center; text-decoration: underline;">Stonks Bot</h1>
+        <h2>Tag:<h2>
+        <input type="text" id="tagTB" />
+        
+        <h2>Start Date: <h2>
+        <input type="date" id="startDate" />    
+        <button id="btn">
+            Submit
+        </button>
+
+        <br />
+        <br />
+        <br />
+
+        <div>
             {%for i in range(0, length)%}
-            <div class="row">
-                <div class="col-md-1">Graph: {{data[i].tag}}</div>
-                <div class="col-md-10" style="border: black solid 3px; height: 500px; width: 500px;">
-                    <img src={{data[i].img}} />
+            <div class="data_point">
+                <h2 style="text-align: center;">Graph: {{data[i].tag}}</h2>
+                <div style="text-align: center; border: black solid 3px; height: 900px; width: 1000px;">
+                    <img src={{data[i].img}} alt="the graph for the {{data[i].tag}} data"/>
+                    <p>{{data[i].data[1]}}</p>
                 </div>
-                <!-- we will add more information for each comparison here-->
+                
             </div>
             {%endfor%}
+        </div>
         </div>
     </body>
     <script src={{url_for('static', filename='director.js')}}></script>

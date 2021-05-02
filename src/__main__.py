@@ -12,7 +12,7 @@ class tag_data:
         self.start = start
         self.end = end
         self.img = url_for('static', filename=self.tag + '.png')
-        self.data = [data]
+        self.data = data
 
     def __repr__(self):
         return f'''{self.tag}
