@@ -218,13 +218,7 @@ def get_predictive_model(tag:str, start_date = pd.to_datetime('2020-01-01'), end
     # Get the predicted values
     predictions = model.predict(x_test)
 
-    # Mean Absolute Percentage Error (MAPE)
-    MAPE = np.mean((np.abs(np.subtract(y_test, predictions)/ y_test))) * 100
-    
 
-    # Median Absolute Percentage Error (MDAPE)
-    MDAPE = np.median((np.abs(np.subtract(y_test, predictions)/ y_test)) ) * 100
-    
     # Get the predicted values
     pred_unscaled = scaler_pred.inverse_transform(predictions)
 
