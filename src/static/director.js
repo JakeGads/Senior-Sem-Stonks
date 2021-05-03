@@ -10,19 +10,24 @@ document.getElementById('btn').onclick = function() {
     let replacements = [',', '\\', '/', '.', ' ', '\t'];
 
     replacements.forEach(function(i) {
-        while (tags.indexOf(i) == -1){
+        while (tags.indexOf(i) != -1){
             tags = tags.replace(i, '|');
         }
     });
 
+    console.log(replacements);
+
     if (tags=""){
-        location.href = "/";
+        console.log('/')
+        window.location = "/";
     }
 
     if(start_date !== ""){
-        location.href = "index/" + tags + "/" + start_date;
+        console.log("home/" + tags + "/" + start_date)
+        window.location = "home/" + tags + "/" + start_date;
     }
     else if (start_date === ""){
-        location.href = "index/" + tags;
+        console.log("home/" + tags + "/" + start_date)
+        window.location = "home/" + tags;
     }   
 }

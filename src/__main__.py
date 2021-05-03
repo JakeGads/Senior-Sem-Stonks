@@ -51,4 +51,4 @@ def home(tags:str = "GME", start_date: str = to_datetime("2018-01-01"), end_date
     return render_template('index.html', length=len(data), data=data)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host ='0.0.0.0', port = 5001, debug = True)
