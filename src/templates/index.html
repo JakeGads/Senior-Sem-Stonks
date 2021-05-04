@@ -4,14 +4,14 @@
         <meta charset="UTF-8">
         <title>Stock Estimator</title>
         <link href={{url_for('static', filename="index.css")}} rel="stylesheet" type="text/css">
-
+        <link rel="stylesheet" href="../static/index.css">
     </head>
     <body>
-        <h1 style="text-align: center; text-decoration: underline;">Stonks Bot</h1>
-        <h2>Tag:<h2>
+        <h1 class="stonksHeader">Stonks Bot</h1>
+        <h2 class="inputLabel">Tag:<h2>
         <input type="text" id="tagTB" />
         
-        <h2>Start Date: <h2>
+        <h2 class="inputLabel">Start Date: <h2>
         <input type="date" id="startDate" />    
         <button id="btn">
             Submit
@@ -24,8 +24,8 @@
         <div>
             {%for i in range(0, length)%}
             <div class="point">
-                <h2 style="text-align: center;">{{data[i].tag}}</h2>
-                <div style="text-align: center; border: black solid 3px; height: 900px; width: 1000px;">
+                <h2 class="dataH2">{{data[i].tag}}</h2>
+                <div class="dataDiv">
                     <img src={{data[i].img}} alt="the graph for the {{data[i].tag}} data"/>
                     <p>{{data[i].data[1]}}</p>
                 </div>
