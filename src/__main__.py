@@ -40,7 +40,13 @@ def home(tags:str = "GME", start_date: str = to_datetime("2018-01-01"), end_date
             # thread = ''
             # with concurrent.futures.ThreadPoolExecutor() as executor:
             #     thread = executor.submit(get_predictive_model, [i, start_date, end_date])
-            data.append(tag_data(i, start_date, end_date, get_predictive_model(i, start_date, end_date)))
+            data.append(
+                tag_data(i, 
+                    start_date, 
+                    end_date, 
+                    get_predictive_model(i, start_date, end_date)
+                )
+            )
         except:
             data.append(tag_data(i, start_date, end_date, ['error.png', 'error  ']))
     for i in data:

@@ -1,16 +1,3 @@
-# FROM python:3.8-slim-buster
-
-# RUN python -m venv env
-# RUN source env/source/activate
-
-# ADD req.pip .
-
-# RUN pip install -r req.pip --user
-
-# COPY . .
-
-# CMD [ "python3", "-m", "src", "--host=0.0.0.0"]
-
 # syntax=docker/dockerfile:1
 
 FROM python:3.8-slim-buster
