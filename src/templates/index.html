@@ -3,21 +3,35 @@
     <head>
         <meta charset="UTF-8">
         <title>Stock Estimator</title>
-        <link href={{url_for('static', filename="index.css")}} rel="stylesheet" type="text/css"?t=123456>
+        <link rel="stylesheet" href="main.css">
+        <link rel="stylesheet" href="bootstrap.css">
 
     </head>
-    <body>
-        <h1 class="stonksHeader">Stonks Bot</h1>
-        <h2 class="inputLabel">Tag:<h2>
-        <input type="text" id="tagTB" />
-        
-        <h2 class="inputLabel">Start Date: <h2>
-        <input type="date" id="startDate" />    
-        <button id="btn">
-            Submit
-        </button>
-
-        <div>
+    <body id="mainBody">
+        <div class="row stonksHeaderRow">
+            <h1 class="stonksHeader">Stonks Bot</h1>
+        </div>
+        <div class="container">
+            <div class="row" style="margin-left: 4%">
+                <div class="col-md-1 tagLabelDiv">
+                    <h4 id="tagLabel">Tag: </h4>
+                </div>
+                <div class="col-md-2 tagDiv">
+                    <input type="text" placeholder="Stock tag..." id="tagTB" />
+                </div>
+                <div class = "col-md-2"></div>
+                <div class="col-md-2 dateLabelDiv">
+                    <h4 id="startDateLabel">Start Date: </h4>
+                </div>
+                <div class="col-md-2 dateDiv">
+                    <input type="date" id="startDate" />
+                </div>
+                <div class="col-md-2 buttonDiv">
+                    <button class="submitBtn" id="btn">
+                        Submit
+                    </button>
+                </div>
+            </div>
             {%for i in range(0, length)%}
             <div class="point">
                 <h2 class="dataH2">{{data[i].tag}}</h2>
@@ -25,11 +39,8 @@
                     <img src={{data[i].img}} alt="the graph for the {{data[i].tag}} data"/>
                     <p>{{data[i].data[1]}}</p>
                 </div>
-                
             </div>
             {%endfor%}
         </div>
-        </div>
     </body>
-    <script src={{url_for('static', filename='director.js')}}?t=123456></script>
 </html>
