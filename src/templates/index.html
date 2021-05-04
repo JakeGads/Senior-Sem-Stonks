@@ -3,9 +3,8 @@
     <head>
         <meta charset="UTF-8">
         <title>Stock Estimator</title>
-        <link rel="stylesheet" href="main.css">
-        <link rel="stylesheet" href="bootstrap.css">
-
+        <link rel="stylesheet" href={{url_for('static', filename='main.css')}}>
+        <link rel="stylesheet" href={{url_for('static', filename='bootstrap.css')}}>
     </head>
     <body id="mainBody">
         <div class="row stonksHeaderRow">
@@ -43,4 +42,5 @@
             {%endfor%}
         </div>
     </body>
+    <script type="text/javascript" src={{url_for('static', filename='director.js')}}></script>
 </html>
