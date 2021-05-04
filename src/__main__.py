@@ -28,7 +28,7 @@ class tag_data:
 @app.route('/home/')
 @app.route('/home/<tags>')
 @app.route('/home/<tags>/<start_date>')
-def home(tags:str = "GME", start_date: str = to_datetime("2018-01-01"), end_date: str = dt.now()):
+def home(tags:str = "GME", start_date: str = to_datetime("2021-01-01"), end_date: str = dt.now()):
     print(f'/home/{tags}/{start_date}')
     if type(start_date) == type('string'):
         start_date = to_datetime(start_date)
