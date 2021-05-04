@@ -9,15 +9,14 @@ document.getElementById('btn').onclick = function() {
 
     let replacements = [',', '\\', '/', '.', ' ', '\t'];
 
-    replacements.forEach(function(i) {
-        while (tags.indexOf(i) != -1){
-            tags = tags.replace(i, '|');
-        }
-    });
+    for(i in replacements){
+        tags = tags.replaceAll(replacements[i], '|');
+    }
+    
 
     console.log(replacements);
 
-    if (tags=""){
+    if (tags===""){
         console.log('/')
         window.location = "/";
     }
