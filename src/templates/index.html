@@ -3,8 +3,8 @@
     <head>
         <meta charset="UTF-8">
         <title>Stock Estimator</title>
-        <link href={{url_for('static', filename="index.css")}} rel="stylesheet" type="text/css">
-        <link rel="stylesheet" href="../static/index.css">
+        <link href={{url_for('static', filename="index.css")}} rel="stylesheet" type="text/css"?t=123456>
+
     </head>
     <body>
         <h1 class="stonksHeader">Stonks Bot</h1>
@@ -16,10 +16,6 @@
         <button id="btn">
             Submit
         </button>
-
-        <br />
-        <br />
-        <br />
 
         <div>
             {%for i in range(0, length)%}
@@ -35,5 +31,5 @@
         </div>
         </div>
     </body>
-    <script src={{url_for('static', filename='director.js')}}></script>
+    <script src={{url_for('static', filename='director.js')}}?t=123456></script>
 </html>
