@@ -1,0 +1,87 @@
+.stonksHeader {
+    text-align: center;
+    margin-left: 45%;
+}
+
+#mainBody {
+    background-color: lightgray;
+    overflow-x: hidden;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+.stonksHeaderRow {
+    height: 60px;
+    border-bottom: 2px solid black;
+    text-align: center;
+}
+
+h2 {
+    font-weight: bold;
+}
+
+#tagLabel {
+    float: right;
+}
+
+#startDateLabel {
+    float: right;
+}
+
+.tagLabelDiv {
+    padding-top: 1%;
+    float: right;
+}
+
+.tagDiv {
+    padding-top: 1%;
+}
+
+.dateLabelDiv {
+    padding-top: 1%;
+    float: right;
+}
+
+.dateDiv{
+    padding-top: 1%;
+}
+
+.buttonDiv{
+    padding-top: 1%;
+}
+
+#startDate{
+    cursor: pointer;
+}
+
+.submitBtn {
+    width: 100%;
+    border: 2px black solid;
+    border-radius: 4px;
+    background-color: blue;
+    color: white;
+    cursor: pointer;
+}
+
+.submitBtn:hover {
+    background-color: white;
+    color: black;
+    cursor: pointer;
+}
+
+.dataH2{
+    text-align: center;
+    width: 100%;
+    margin-top: 5%;
+    text-decoration: underline;
+}
+
+
+.graphDiv {
+    height: 900px;
+    width: 1000px;
+    border: 4px solid black;
+    margin-left: 5%;
+}
