@@ -3,6 +3,7 @@ from timeseries import get_predictive_model
 from datetime import datetime as dt
 import concurrent.futures
 from pandas import to_datetime
+import sys
 
 app = Flask(__name__)
 
@@ -57,5 +58,24 @@ def home(tags:str = "GME", start_date: str = to_datetime("2021-01-01"), end_date
 
     return render_template('index.html', length=len(data), data=data)
 
+def cli():
+    date_text = to_datetime('2018-01-01')
+    try:
+        date_text = dt.strptime(sys.argv[len(sys.argv) - 1], '%Y-%m-%d')
+        tags = sys.argv[1: len(sys.argv) - 1]
+    except ValueError:
+        tags = sys.argv[1: len(sys.argv)]
+        None
+    
+    for i in tags:
+        try:
+            get_predictive_model(i, date_text, dt.today())
+        except :
+            None
+
+
 if __name__ == '__main__':
-    app.run(host ='0.0.0.0', port = 5001, debug = True)
+    if len(sys.argv) <= 1:
+        app.run(host ='0.0.0.0', port = 5001, debug = True)
+    else:
+        cli()
